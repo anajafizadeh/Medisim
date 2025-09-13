@@ -1,0 +1,39 @@
+id: "case_uti_001"
+title: "Dysuria and frequency in a young adult"
+specialty: "Family Medicine"
+difficulty: "Easy"
+objectives:
+  - "Elicit key history for lower urinary tract symptoms"
+rubric_id: "rubric_uti_v1"
+patient:
+  demographics: { age: 24, sex: "female" }
+  personality: "cooperative"
+  baseline_vitals: { temp_c: 37.4, hr: 88, rr: 16, bp: "112/70" }
+  core_story:
+    chief_complaint: "Burning urination and frequency"
+    hpi_summary: |
+      Onset 3 days ago, dysuria and frequency, no flank pain, mild suprapubic discomfort.
+      No vaginal discharge. Sexually active, monogamous.
+qa_reveals:
+  hx_onset: "It started about three days ago."
+  hx_quality: "It burns when I pee."
+  hx_flank_pain: "No, the pain is more in the lower belly."
+  hx_discharge: "No discharge."
+  hx_pregnancy: "My last period was two weeks ago, and they're regular."
+orders:
+  allowed: ["Urinalysis", "Urine culture", "Pregnancy test"]
+  results:
+    "Urinalysis": |
+      Leukocyte esterase positive, nitrites positive, WBCs 10-20/hpf
+    "Urine culture": "Pending at 48 hours"
+    "Pregnancy test": "Negative"
+expected:
+  key_findings:
+    - "Dysuria and frequency without discharge"
+    - "No flank pain"
+    - "Positive nitrites/leukocyte esterase on UA"
+  differentials:
+    should_include: ["Acute uncomplicated cystitis"]
+    reasonable_alternatives: ["Vaginitis", "Urethritis"]
+  final_dx: "Acute uncomplicated cystitis"
+  initial_plan_high_level: ["Outpatient management", "Education and safety net"]
