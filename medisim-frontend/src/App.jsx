@@ -1,12 +1,20 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useState } from "react";
+import LoginForm from "./components/LoginForm";
+import CaseList from "./components/CaseList";
+import ChatWindow from "./components/ChatWindow";
 
 export default function App() {
+  const [loggedIn, setLoggedIn] = useState(!!localStorage.getItem("access"));
+
   return (
-    <h1 className="text-3xl font-bold underline text-blue-500">
-      Hello Medisim Frontend 👋
-    </h1>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<LoginForm onLogin={() => setLoggedIn(true)} />} />
+        <Route path="/cases" element={loggedIn ? <CaseList /> : <Navigate to="/login" />} />
+        <Route path="/runs/:id" element={<ChatWindow runId={2} />} /> {/* placeholder */}
+        <Route path="*" element={<Navigate to="/cases" />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
