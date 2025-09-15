@@ -31,16 +31,25 @@ class RunViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=['get', 'post'])
     def messages(self, request, pk=None):
         run = self.get_object()
+
+        if request.method.lower() == 'get':
+            # Return all messages for this run
+            msgs = Message.objects.filter(run=run).order_by('created_at')
+            return Response(MessageSerializer(msgs, many=True).data)
+
+        # Handle POST (student sends a message)
         case = parse_case_yaml(run.case.yaml_blob)
 
         student_text = request.data.get('text', '')
         tags = classify_intents(student_text)
-        student_msg = Message.objects.create(run=run, sender='student', text=student_text, tags_json=tags)
+        student_msg = Message.objects.create(
+            run=run, sender='student', text=student_text, tags_json=tags
+        )
 
-        # Construct patient reply by mapping tags → reveals (simple concatenation for MVP)
+        # Construct patient reply by mapping tags → reveals (simple MVP)
         replies = []
         for t in tags:
             if t in case.reveals:
@@ -48,7 +57,9 @@ class RunViewSet(viewsets.ModelViewSet):
         if not replies:
             replies = ["I'm not sure what you mean. Could you clarify?"]
         patient_text = ' '.join(replies)
-        patient_msg = Message.objects.create(run=run, sender='patient', text=patient_text, tags_json=[])
+        patient_msg = Message.objects.create(
+            run=run, sender='patient', text=patient_text, tags_json=[]
+        )
 
         return Response({
             'student': MessageSerializer(student_msg).data,
