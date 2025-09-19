@@ -13,8 +13,12 @@ from engine.case_loader import parse_case_yaml
 from engine.intent import classify_intents
 from engine.evaluator import evaluate_transcript
 import yaml
+from openai import OpenAI
+import os
 
 User = get_user_model()
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 class CaseViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Case.objects.all().order_by('-created_at')
@@ -40,23 +44,38 @@ class RunViewSet(viewsets.ModelViewSet):
             msgs = Message.objects.filter(run=run).order_by('created_at')
             return Response(MessageSerializer(msgs, many=True).data)
 
-        # Handle POST (student sends a message)
-        case = parse_case_yaml(run.case.yaml_blob)
-
+        # --- POST: student sends a message ---
         student_text = request.data.get('text', '')
-        tags = classify_intents(student_text)
         student_msg = Message.objects.create(
-            run=run, sender='student', text=student_text, tags_json=tags
+            run=run, sender='student', text=student_text, tags_json=[]
         )
 
-        # Construct patient reply by mapping tags → reveals (simple MVP)
-        replies = []
-        for t in tags:
-            if t in case.reveals:
-                replies.append(case.reveals[t])
-        if not replies:
-            replies = ["I'm not sure what you mean. Could you clarify?"]
-        patient_text = ' '.join(replies)
+        # Build conversation history (for context)
+        past_messages = Message.objects.filter(run=run).order_by('created_at')
+        chat_history = []
+        for msg in past_messages:
+            role = "assistant" if msg.sender == "patient" else "user"
+            chat_history.append({"role": role, "content": msg.text})
+
+        # Include case YAML as context so GPT answers consistently
+        system_prompt = f"""
+        You are simulating a virtual patient for a medical training app.
+        Only answer as the patient. Stay consistent with the following case details:
+
+        {run.case.yaml_blob}
+        """
+
+        # Call GPT
+        try:
+            completion = client.chat.completions.create(
+                model="gpt-4o-mini",   # light, fast model
+                messages=[{"role": "system", "content": system_prompt}] + chat_history
+            )
+            patient_text = completion.choices[0].message.content.strip()
+        except Exception as e:
+            # Fallback if API fails
+            patient_text = "I'm having trouble answering right now. Please try again."
+
         patient_msg = Message.objects.create(
             run=run, sender='patient', text=patient_text, tags_json=[]
         )

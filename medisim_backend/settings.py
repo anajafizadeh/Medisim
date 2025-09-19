@@ -1,9 +1,14 @@
 from pathlib import Path
 import os
 from datetime import timedelta
+import os
+from dotenv import load_dotenv
+
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / ".env") 
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'dev-secret')
 DEBUG = os.getenv('DJANGO_DEBUG', 'True') == 'True'
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
