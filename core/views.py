@@ -15,6 +15,7 @@ from engine.evaluator import evaluate_transcript
 import yaml
 from openai import OpenAI
 import os
+from rest_framework.decorators import api_view
 
 User = get_user_model()
 
@@ -128,3 +129,30 @@ class RunViewSet(viewsets.ModelViewSet):
         if not hasattr(run, 'evaluation'):
             return Response({'detail': 'Not evaluated yet.'}, status=404)
         return Response(EvaluationSerializer(run.evaluation).data)
+    
+    @action(detail=True, methods=['get'])
+    def patient(self, request, pk=None):
+        run = self.get_object()
+        case_data = yaml.safe_load(run.case.yaml_blob)
+        patient = case_data.get("patient", {})
+
+        demographics = patient.get("demographics", {})
+        vitals = patient.get("baseline_vitals", {})
+
+        response = {
+            "name": demographics.get("name", "unknown"),
+            "age": demographics.get("age", "unknown"),
+            "gender": demographics.get("sex", "unknown"),
+            "personality": patient.get("personality", "unknown"),
+            "vitals": {
+                "temp_c": vitals.get("temp_c", "unknown"),
+                "hr": vitals.get("hr", "unknown"),
+                "rr": vitals.get("rr", "unknown"),
+                "bp": vitals.get("bp", "unknown"),
+            },
+            "history": [
+                patient.get("core_story", {}).get("chief_complaint", "unknown")
+            ],
+        }
+
+        return Response(response)
