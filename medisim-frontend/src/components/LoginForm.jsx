@@ -10,11 +10,18 @@ export default function LoginForm({ onLogin }) {
   async function handleSubmit(e) {
     e.preventDefault();
     try {
+      // 1. Get JWT tokens
       const res = await client.post("/token/", { username, password });
       localStorage.setItem("access", res.data.access);
       localStorage.setItem("refresh", res.data.refresh);
+
+      // 2. Fetch user info (/me/) and store role
+      const meRes = await client.get("/me/");
+      localStorage.setItem("role", meRes.data.role);
+
+      // 3. Continue normal login flow
       onLogin();
-      navigate("/cases");          // redirect works again
+      navigate("/cases");
     } catch (err) {
       alert("Login failed");
     }
@@ -40,7 +47,10 @@ export default function LoginForm({ onLogin }) {
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        <button className="bg-blue-500 w-full text-white px-4 py-2 rounded hover:bg-blue-600 transition" type="submit">
+        <button
+          className="bg-blue-500 w-full text-white px-4 py-2 rounded hover:bg-blue-600 transition"
+          type="submit"
+        >
           Login
         </button>
       </form>

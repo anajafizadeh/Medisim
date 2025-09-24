@@ -3,6 +3,8 @@ import { useState } from "react";
 import LoginForm from "./components/LoginForm";
 import CaseList from "./components/CaseList";
 import ChatWindow from "./components/ChatWindow";
+import CaseBuilder from "./pages/CaseBuilder";
+import AppLayout from "./components/AppLayout";
 
 export default function App() {
   const [loggedIn, setLoggedIn] = useState(!!localStorage.getItem("access"));
@@ -10,19 +12,55 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Public route */}
         <Route
           path="/login"
           element={<LoginForm onLogin={() => setLoggedIn(true)} />}
         />
+
+        {/* Protected routes */}
         <Route
           path="/cases"
-          element={loggedIn ? <CaseList /> : <Navigate to="/login" />}
+          element={
+            loggedIn ? (
+              <AppLayout>
+                <CaseList />
+              </AppLayout>
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
         />
         <Route
           path="/runs/:id"
-          element={loggedIn ? <ChatWindow /> : <Navigate to="/login" />}
+          element={
+            loggedIn ? (
+              <AppLayout>
+                <ChatWindow />
+              </AppLayout>
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
         />
-        <Route path="*" element={<Navigate to={loggedIn ? "/cases" : "/login"} />} />
+        <Route
+          path="/instructor/cases/new"
+          element={
+            loggedIn ? (
+              <AppLayout>
+                <CaseBuilder />
+              </AppLayout>
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        />
+
+        {/* Fallback */}
+        <Route
+          path="*"
+          element={<Navigate to={loggedIn ? "/cases" : "/login"} />}
+        />
       </Routes>
     </BrowserRouter>
   );

@@ -7,24 +7,38 @@ from django.contrib.auth import get_user_model
 from .models import Case, Run, Message, Order, Result, Evaluation
 from .serializers import (
     CaseListSerializer, CaseDetailSerializer, RunSerializer,
-    MessageSerializer, OrderSerializer, ResultSerializer, EvaluationSerializer
+    MessageSerializer, OrderSerializer, ResultSerializer, EvaluationSerializer, CaseCreateUpdateSerializer
 )
+from .permissions import IsInstructor
 from engine.case_loader import parse_case_yaml
 from engine.intent import classify_intents
 from engine.evaluator import evaluate_transcript
 import yaml
 from openai import OpenAI
 import os
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 
 User = get_user_model()
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-class CaseViewSet(viewsets.ReadOnlyModelViewSet):
+class CaseViewSet(viewsets.ModelViewSet):
     queryset = Case.objects.all().order_by('-created_at')
+
     def get_serializer_class(self):
-        return CaseDetailSerializer if self.action == 'retrieve' else CaseListSerializer
+        if self.action in ["create", "update", "partial_update"]:
+            return CaseCreateUpdateSerializer
+        if self.action == "retrieve":
+            return CaseDetailSerializer
+        return CaseListSerializer
+
+    def get_permissions(self):
+        if self.action in ["create", "update", "partial_update", "destroy"]:
+            return [IsAuthenticated(), IsInstructor()]
+        return [IsAuthenticated()]
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
 
 class RunViewSet(viewsets.ModelViewSet):
     queryset = Run.objects.all()
@@ -156,3 +170,13 @@ class RunViewSet(viewsets.ModelViewSet):
         }
 
         return Response(response)
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def me(request):
+    user = request.user
+    return Response({
+        "id": user.id,
+        "username": user.username,
+        "role": user.role,
+    })

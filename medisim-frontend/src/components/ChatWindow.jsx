@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import client from "../api/client";
 
 function PatientInfo({ patient }) {
@@ -14,8 +14,8 @@ function PatientInfo({ patient }) {
 
   return (
     <div className="w-1/3 bg-gray-50 p-6 border-l border-gray-200">
-      <h2 className="text-lg font-semibold mb-4">Patient Info</h2>
-      <div className="space-y-2">
+      <h2 className="text-lg font-semibold mb-4 text-gray-700">Patient Info</h2>
+      <div className="space-y-2 text-gray-600">
         <p><span className="font-medium">Name:</span> {patient.name}</p>
         <p><span className="font-medium">Age:</span> {patient.age}</p>
         <p><span className="font-medium">Gender:</span> {patient.gender}</p>
@@ -37,15 +37,12 @@ export default function ChatWindow() {
   const [messages, setMessages] = useState([]);
   const [patient, setPatient] = useState(null);
   const [input, setInput] = useState("");
-  const navigate = useNavigate();
 
-  // 🔹 Fetch messages
   async function fetchMessages() {
     const res = await client.get(`/runs/${runId}/messages/`);
     setMessages(res.data);
   }
 
-  // 🔹 Fetch patient info
   async function fetchPatient() {
     try {
       const res = await client.get(`/runs/${runId}/patient/`);
@@ -73,32 +70,16 @@ export default function ChatWindow() {
   }
 
   return (
-    <div className="w-screen h-screen flex">
+    <div className="w-full h-full flex">
       {/* Chat Section */}
       <div className="flex flex-col flex-1 bg-gray-100">
-        {/* Header */}
-        <div className="p-4 border-b bg-white shadow flex items-center justify-between">
-          <h2 className="text-lg font-bold">Case #{runId}</h2>
-          <div className="flex gap-2">
-            <button
-              onClick={() => navigate("/cases")}
-              className="bg-gray-200 text-gray-700 px-3 py-1 rounded hover:bg-gray-300 transition"
-            >
-              ← Back to Cases
-            </button>
-            <button
-              onClick={() => { localStorage.clear(); navigate("/login"); }}
-              className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
-
         {/* Messages */}
         <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-3 w-full">
           {messages.map((m) => (
-            <div key={m.id} className={`flex w-full ${m.sender === "student" ? "justify-end" : "justify-start"}`}>
+            <div
+              key={m.id}
+              className={`flex w-full ${m.sender === "student" ? "justify-end" : "justify-start"}`}
+            >
               <div
                 className={`p-3 rounded-lg max-w-md break-words ${
                   m.sender === "student" ? "bg-blue-500 text-white" : "bg-gray-200 text-black"
@@ -118,7 +99,10 @@ export default function ChatWindow() {
             className="flex-1 border rounded px-3 py-2"
             placeholder="Type your message..."
           />
-          <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">
+          <button
+            type="submit"
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
+          >
             Send
           </button>
         </form>
