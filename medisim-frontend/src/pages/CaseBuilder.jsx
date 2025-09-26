@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import client from "../api/client";
+import HelpTooltip from "../components/HelpTooltip";
 
 const emptyState = {
   title: "",
@@ -98,11 +99,25 @@ export default function CaseBuilder() {
       <form onSubmit={onSubmit} className="space-y-8">
         {/* Basics */}
         <section className="bg-white p-5 rounded-xl shadow border space-y-4">
-          <h2 className="text-lg font-semibold">Basics</h2>
+          <h2 className="text-lg font-semibold text-gray-700">Basics</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input label="Title *" value={form.title} onChange={(v) => set("title", v)} />
-            <Input label="Rubric ID *" value={form.rubric_id} onChange={(v) => set("rubric_id", v)} />
-            <Input label="Specialty" value={form.specialty} onChange={(v) => set("specialty", v)} />
+            <Input label={
+            <>
+              Title * <HelpTooltip text="The display name of the case, e.g. 'Dysuria and frequency in a young adult'." />     
+             </>
+            } 
+            value={form.title} onChange={(v) => set("title", v)} />
+            <Input label={
+              <>
+              Rubric ID * <HelpTooltip text="ID of the rubric used to evaluate this case. Must match an existing rubric."/>
+              </>
+            } 
+            value={form.rubric_id} onChange={(v) => set("rubric_id", v)} />
+            <Input label={
+              <>
+              Specialty <HelpTooltip text="The medical specialty this case belongs to, e.g. Family Medicine, Cardiology."/>
+              </>}
+              value={form.specialty} onChange={(v) => set("specialty", v)} />
             <Select
               label="Difficulty"
               value={form.difficulty}
@@ -112,7 +127,12 @@ export default function CaseBuilder() {
           </div>
 
           <ListEditor
-            label="Objectives"
+            label={
+              <>
+                Objectives{" "}
+                <HelpTooltip text="Learning goals the student should achieve while working on this case." />
+              </>
+            }
             items={form.objectives}
             onAdd={() => addToList("objectives")}
             onRemove={(i) => removeFromList("objectives", i)}
@@ -122,29 +142,35 @@ export default function CaseBuilder() {
 
         {/* Patient */}
         <section className="bg-white p-5 rounded-xl shadow border space-y-4">
-          <h2 className="text-lg font-semibold">Patient</h2>
+          <h2 className="text-lg font-semibold text-gray-700">Patient</h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Input label="Age" value={form.patient.demographics.age} onChange={(v) => set("patient.demographics.age", v)} />
-            <Input label="Sex" value={form.patient.demographics.sex} onChange={(v) => set("patient.demographics.sex", v)} />
-            <Input label="Personality" value={form.patient.personality} onChange={(v) => set("patient.personality", v)} />
+            <Input label={<>Age <HelpTooltip text="Patient's age in years." /></>} value={form.patient.demographics.age} onChange={(v) => set("patient.demographics.age", v)} />
+            <Input label={<>Sex <HelpTooltip text="Biological sex of the patient (male/female)." /></>} value={form.patient.demographics.sex} onChange={(v) => set("patient.demographics.sex", v)} />
+            <Input label={<>Personality <HelpTooltip text="General demeanor of the patient (e.g. cooperative, anxious)." /></>} value={form.patient.personality} onChange={(v) => set("patient.personality", v)} />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Input label="Temp (°C)" value={form.patient.baseline_vitals.temp_c} onChange={(v) => set("patient.baseline_vitals.temp_c", v)} />
-            <Input label="HR" value={form.patient.baseline_vitals.hr} onChange={(v) => set("patient.baseline_vitals.hr", v)} />
-            <Input label="RR" value={form.patient.baseline_vitals.rr} onChange={(v) => set("patient.baseline_vitals.rr", v)} />
-            <Input label="BP" value={form.patient.baseline_vitals.bp} onChange={(v) => set("patient.baseline_vitals.bp", v)} />
+            <Input label={<>Temp (°C) <HelpTooltip text="Baseline body temperature." /></>} value={form.patient.baseline_vitals.temp_c} onChange={(v) => set("patient.baseline_vitals.temp_c", v)} />
+            <Input label={<>HR <HelpTooltip text="Baseline heart rate (beats per minute)." /></>} value={form.patient.baseline_vitals.hr} onChange={(v) => set("patient.baseline_vitals.hr", v)} />
+            <Input label={<>RR <HelpTooltip text="Baseline respiratory rate (breaths per minute)." /></>} value={form.patient.baseline_vitals.rr} onChange={(v) => set("patient.baseline_vitals.rr", v)} />
+            <Input label={<>BP <HelpTooltip text="Baseline blood pressure (systolic/diastolic)." /></>} value={form.patient.baseline_vitals.bp} onChange={(v) => set("patient.baseline_vitals.bp", v)} />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input label="Chief Complaint" value={form.patient.core_story.chief_complaint} onChange={(v) => set("patient.core_story.chief_complaint", v)} />
-            <TextArea label="HPI Summary" value={form.patient.core_story.hpi_summary} onChange={(v) => set("patient.core_story.hpi_summary", v)} />
+            <Input label={<>Chief Complaint <HelpTooltip text="The main symptom or problem the patient reports." /></>} value={form.patient.core_story.chief_complaint} onChange={(v) => set("patient.core_story.chief_complaint", v)} />
+            <TextArea label={<>HPI Summary <HelpTooltip text="Summary of the history of present illness (patient’s narrative of their symptoms)." /></>} value={form.patient.core_story.hpi_summary} onChange={(v) => set("patient.core_story.hpi_summary", v)} />
           </div>
         </section>
 
         {/* Q&A Reveals */}
         <section className="bg-white p-5 rounded-xl shadow border space-y-4">
-          <h2 className="text-lg font-semibold">Q&A Reveals</h2>
+          <h2 className="text-lg font-semibold text-gray-700">Q&A Reveals</h2>
+
+          <label className="block text-sm text-gray-700 mb-1">
+            Pre-scripted Answers{" "}
+            <HelpTooltip text="Define question → answer pairs. Example: 'When did this start?' → 'Three days ago'." />
+          </label>
+
           <KVEditor
             obj={form.qa_reveals}
             onAdd={(k, v) => setKV("qa_reveals", k, v)}
@@ -154,17 +180,19 @@ export default function CaseBuilder() {
 
         {/* Orders */}
         <section className="bg-white p-5 rounded-xl shadow border space-y-4">
-          <h2 className="text-lg font-semibold">Orders</h2>
+          <h2 className="text-lg font-semibold text-gray-700">Orders</h2>
 
           <ListEditor
-            label="Allowed Tests"
+            label={<>Allowed Tests <HelpTooltip text="List of diagnostic tests the student is permitted to order." /></>}
             items={form.orders.allowed}
             onAdd={() => addToList("orders.allowed")}
             onRemove={(i) => removeFromList("orders.allowed", i)}
             onChange={(i, v) => updateListItem("orders.allowed", i, v)}
           />
 
-          <h3 className="font-medium">Results (per test)</h3>
+          <h3 className="font-medium flex items-center gap-1 text-gray-600">
+            Results (per test) <HelpTooltip text="Expected results for each test. Keys must match an allowed test." />
+          </h3>
           <KVEditor
             obj={form.orders.results}
             onAdd={(k, v) => setKV("orders.results", k, v)}
@@ -176,10 +204,10 @@ export default function CaseBuilder() {
 
         {/* Expected */}
         <section className="bg-white p-5 rounded-xl shadow border space-y-4">
-          <h2 className="text-lg font-semibold">Expected</h2>
+          <h2 className="text-lg font-semibold text-gray-700">Expected</h2>
 
           <ListEditor
-            label="Key Findings"
+            label={<>Key Findings <HelpTooltip text="Important clinical findings that should be elicited during the encounter." /></>}
             items={form.expected.key_findings}
             onAdd={() => addToList("expected.key_findings")}
             onRemove={(i) => removeFromList("expected.key_findings", i)}
@@ -188,14 +216,14 @@ export default function CaseBuilder() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <ListEditor
-              label="Differentials: Should Include"
+              label={<>Differentials: Should Include <HelpTooltip text="Critical diagnoses that must appear in the student's differential diagnosis." /></>}
               items={form.expected.differentials.should_include}
               onAdd={() => addToList("expected.differentials.should_include")}
               onRemove={(i) => removeFromList("expected.differentials.should_include", i)}
               onChange={(i, v) => updateListItem("expected.differentials.should_include", i, v)}
             />
             <ListEditor
-              label="Differentials: Reasonable Alternatives"
+              label={<>Differentials: Reasonable Alternatives <HelpTooltip text="Other diagnoses that could reasonably be considered but are not required." /></>}
               items={form.expected.differentials.reasonable_alternatives}
               onAdd={() => addToList("expected.differentials.reasonable_alternatives")}
               onRemove={(i) => removeFromList("expected.differentials.reasonable_alternatives", i)}
@@ -203,10 +231,10 @@ export default function CaseBuilder() {
             />
           </div>
 
-          <Input label="Final Diagnosis" value={form.expected.final_dx} onChange={(v) => set("expected.final_dx", v)} />
+          <Input label={<>Final Diagnosis <HelpTooltip text="The correct final diagnosis for this case." /></>} value={form.expected.final_dx} onChange={(v) => set("expected.final_dx", v)} />
 
           <ListEditor
-            label="Initial Plan (High Level)"
+            label={<>Initial Plan (High Level) <HelpTooltip text="High-level management plan: outpatient vs inpatient, education, safety netting, etc." /></>}
             items={form.expected.initial_plan_high_level}
             onAdd={() => addToList("expected.initial_plan_high_level")}
             onRemove={(i) => removeFromList("expected.initial_plan_high_level", i)}
