@@ -5,6 +5,8 @@ import CaseList from "./components/CaseList";
 import ChatWindow from "./components/ChatWindow";
 import CaseBuilder from "./pages/CaseBuilder";
 import AppLayout from "./components/AppLayout";
+import SignupForm from "./components/SignupForm";
+
 
 export default function App() {
   const [loggedIn, setLoggedIn] = useState(!!localStorage.getItem("access"));
@@ -61,6 +63,7 @@ export default function App() {
           path="*"
           element={<Navigate to={loggedIn ? "/cases" : "/login"} />}
         />
+        <Route path="/signup" element={<SignupForm />} />
       </Routes>
     </BrowserRouter>
   );

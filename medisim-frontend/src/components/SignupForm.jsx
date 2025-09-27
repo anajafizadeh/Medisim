@@ -2,28 +2,20 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import client from "../api/client";
 
-export default function LoginForm({ onLogin }) {
+export default function SignupForm() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState("student");
   const navigate = useNavigate();
 
   async function handleSubmit(e) {
     e.preventDefault();
     try {
-      // 1. Get JWT tokens
-      const res = await client.post("/token/", { username, password });
-      localStorage.setItem("access", res.data.access);
-      localStorage.setItem("refresh", res.data.refresh);
-
-      // 2. Fetch user info (/me/) and store role
-      const meRes = await client.get("/me/");
-      localStorage.setItem("role", meRes.data.role);
-
-      // 3. Continue normal login flow
-      onLogin();
-      navigate("/cases");
+      await client.post("/signup/", { username, password, role });
+      alert("Account created! Please log in.");
+      navigate("/login");
     } catch (err) {
-      alert("Login failed");
+      alert("Signup failed: " + (err.response?.data?.detail || "Unknown error"));
     }
   }
 
@@ -36,9 +28,7 @@ export default function LoginForm({ onLogin }) {
         <h2 className="text-2xl font-bold text-center text-blue-600 mb-2">
           Medisim
         </h2>
-        <p className="text-center text-gray-600 mb-6">
-          Virtual patient practice
-        </p>
+        <p className="text-center text-gray-600 mb-6">Sign up for an account</p>
 
         <input
           className="border p-2 w-full mb-3 rounded"
@@ -54,25 +44,22 @@ export default function LoginForm({ onLogin }) {
           onChange={(e) => setPassword(e.target.value)}
         />
 
+        <select
+          className="border p-2 w-full mb-3 rounded"
+          value={role}
+          onChange={(e) => setRole(e.target.value)}
+        >
+          <option value="student">Student</option>
+          <option value="instructor">Instructor</option>
+        </select>
+
         <button
           className="bg-blue-500 w-full text-white px-4 py-2 rounded hover:bg-blue-600 transition"
           type="submit"
         >
-          Login
+          Sign Up
         </button>
-
-        {/* 🔹 Signup link */}
-        <p className="text-center text-gray-600 mt-4">
-          Don’t have an account?{" "}
-          <span
-            className="text-blue-600 cursor-pointer hover:underline"
-            onClick={() => navigate("/signup")}
-          >
-            Sign up
-          </span>
-        </p>
       </form>
     </div>
   );
 }
-

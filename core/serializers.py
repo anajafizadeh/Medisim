@@ -3,8 +3,29 @@ from django.contrib.auth import get_user_model
 from .models import Institution, Cohort, Enrollment, Case, Assignment, Run, Message, Order, Result, Evaluation
 import uuid, yaml
 from django.utils.text import slugify
+from .models import Institution
 
 User = get_user_model()
+
+class SignupSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+    institution_id = serializers.PrimaryKeyRelatedField(
+        source="institution",
+        queryset=Institution.objects.all(),
+        required=False,
+        allow_null=True
+    )
+
+    class Meta:
+        model = User
+        fields = ["id", "username", "password", "role", "institution_id"]
+
+    def create(self, validated_data):
+        password = validated_data.pop("password")
+        user = User(**validated_data)
+        user.set_password(password)
+        user.save()
+        return user
 
 class CaseListSerializer(serializers.ModelSerializer):
     class Meta:
